@@ -6,6 +6,19 @@ dotenv.config( {
 })
 
 connectDB()
+.then( () => {
+    app.listen( process.env.PORT || 3300 , () => {
+        console.log( `SERVER IS RUNNING AT PORT: ${process.env.PORT || 3300 }`)
+    })
+}) 
+.catch( (err) => {
+    console.log( "MongoDB connection failed", err )
+})
+
+
+
+
+
 /* Approach 1
 import express from "express"
 const app = express()
