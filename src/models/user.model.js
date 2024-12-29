@@ -49,7 +49,7 @@ const UserSchema = mongoose.Schema( {
 UserSchema.pre( "save", async function( next ) {
     if( !this.isModified( "password" )) //this code makes sure that the password is hashed for the first time only and password is hashed only when password is modified or saved. this.isModified( ... ) is a default function to check if the passed parameter has been modified or not 
         return next()
-    this.password = bcrypt.hash( this.password, 10 ) //hashing function which hashes password of the current field using .hash( ..., rounds ) using bcrypt inbuild hash()
+    this.password = await bcrypt.hash( this.password, 10 ) //hashing function which hashes password of the current field using .hash( ..., rounds ) using bcrypt inbuild hash()
     next()
 })
 
