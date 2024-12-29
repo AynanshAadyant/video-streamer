@@ -1,1 +1,1 @@
-1. Hardcodded MONGO_URI in src/db/index.js instead of placing in .env 
+no errors
