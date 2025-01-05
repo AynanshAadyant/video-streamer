@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
 
 const UserSchema = mongoose.Schema( {
-    usersname: {
+    username: {
         type: String,
         required: true, 
         unique: true,
@@ -53,10 +53,12 @@ UserSchema.pre( "save", async function( next ) {
     next()
 })
 
+//function used to check if hashed password is correct or not 
 UserSchema.methods.isPasswordCorrect = async function( password ) { //async function as time is taken in cryptography
      return await bcrypt.compare( password, this.password) //.compare( data, param ) is an inbuilt function which compare data and param where data is the normal parameter and param is the cryptographed parameter. it returns true or false as a promise.    
 }
 
+//function to generate access tokens
 UserSchema.methods.generateAccessToken = function() {
     return jwt.sign( {
         _id: this.id,
@@ -68,6 +70,7 @@ UserSchema.methods.generateAccessToken = function() {
     })
 }
 
+//function to generate refresh tokens
 UserSchema.methods.generateRefreshToken = function() {
     return jwt.sign( {
         _id: this.id

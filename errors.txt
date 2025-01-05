@@ -1,1 +1,4 @@
-no errors
+routing issue, avatar trying to be uploaded is not being uploaded in local server - solved
+circular structure to json error being given  - solved - always use await while interacting with DB
+
+hardcoded values in cloudinary.js - ??
