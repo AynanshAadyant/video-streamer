@@ -28,32 +28,31 @@ const registerUser = asyncHandler( async( req, res ) => {
         console.log( `field is empty`)
         throw new apiError( 400, "All fields required" )
     }
-    console.log( `Checked for empty fields`)
+    
     //checks if user exists or not 
     const existedUserUsername = await User.findOne( {username} )
     const existedUserEmail = await User.findOne( {email})
     if( existedUserUsername || existedUserEmail ) {
         throw new apiError( 409, "User still exists")
     }
-    console.log( `checked for already existing users`)
 
     //checking if avatar and coverImage exists in local storage
     const avatarLocalPath =  req?.files?.avatar?.[0]?.path //checking if avatar exists in local storage or not, using conditional operator ?
     const coverImageLocalPath = req.files?.coverImage?.[0]?.path //checking if coverImage exists in local storage or not
-    console.log( `avatar local path: ${avatarLocalPath} , coverImageLocalPath: ${coverImageLocalPath}`)
+    
     //checking if avatar file exists in local
     if( !avatarLocalPath ) {
         console.log( `avatarLocalPath not found`)
         throw new apiError( 400, "Avatar file required" )
     }
+    
     //if avatar and coverImage available then uploading to cloudinary
     const avatar = await uploadOnCloudinary( avatarLocalPath )
     const coverImage = await uploadOnCloudinary( coverImageLocalPath )
-    console.log( `avatar: ${avatar}, coverImage: ${coverImage}`)
+    
     //checking if files successfully uploaded to cloudinary
     if( !avatar ) 
         throw new apiError( 400, "Avatar file not uploaded on Cloudinary")
-    console.log( `checked if avatar exists or not in local storage`)
 
     //creating object to send to DB
     const user = await User.create( {
@@ -64,7 +63,7 @@ const registerUser = asyncHandler( async( req, res ) => {
         password, 
         username: username.toLowerCase()
     })
-    console.log( `data sent to DB for user creation`)
+
     //checking if user is created or not
     const createdUser = await User.findById( user._id ).select( "-password -refreshToken" ).lean()//finding user by _id which is created by DB automatically on entry
     //fields removed from response by using .select( "-param1 -param2 ... ") which remove param1 and param2 from response
@@ -72,7 +71,6 @@ const registerUser = asyncHandler( async( req, res ) => {
     if( !createdUser ){
         throw new apiError( 500, "Something went wrong while creating user")
     }
-    console.log( `User created in DB`)
     
     //sending response
     return res.status(201).json( 
