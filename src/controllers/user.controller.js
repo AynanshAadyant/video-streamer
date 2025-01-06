@@ -94,6 +94,8 @@ const generateTokens = async( userId ) => {
     }
 }
 
+//controller to login user. works by generating access and refresh token for the use. the credentials is encoded in the tokens itself.
+//tow types of tokens are genearted. access token specifies whether the user is loffed in or not. refresh token is used if the user wants to auto login within a specified time frame where user can login without password
 const loginUser = asyncHandler( async( req, res ) => {
     //TODO in loginUser: 
     //1. get data from req.body
@@ -152,7 +154,7 @@ const loginUser = asyncHandler( async( req, res ) => {
     )
 })
 
-
+//controller to logout user. works by removing the access token of user from DB signalling that user is logged out
 const logOutUser = asyncHandler( async( req, res ) => {
     //TODO: 
     //clear cookies of user from server
@@ -180,6 +182,7 @@ const logOutUser = asyncHandler( async( req, res ) => {
 
 })
 
+//controller responsible for user logging in without password within a specific time frame
 const refreshAccessToken = asyncHandler( async( req, res ) => {
     //accessing user's refresh token from cookies
     const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
@@ -222,6 +225,7 @@ const refreshAccessToken = asyncHandler( async( req, res ) => {
     }
 })
 
+//controller to change password
 const changeCurrentPassword = asyncHandler( async( req, res ) => {
     const {oldPassword, newPassword} = req.body
     //finding user in DB which is requesting
@@ -300,5 +304,30 @@ const updateUserAvatar = asyncHandler( async( req, res ) =>{
     ).select( "-password" )
 } )
 
+//controller to update cover image
+const updateUserCoverImage = asyncHandler( async( req, res ) =>{ 
+    const coverImageLocalPath = req.file?.path
 
-export {registerUser, loginUser, logOutUser, refreshAccessToken, changeCurrentPassword, getCurrentUser, updateAccountDetails}
+    if( !coverImageLocalPath) {
+        new apiError( 400, "Avatar file is missing" )
+    }
+
+    const coverImage = await uploadOnCloudinary( coverImageLocalPath )
+
+    if( !coverImage.url ) {
+        throw new apiError( 404, "Error while uploading on avatar" )
+    }
+
+    await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set: {
+                coverImage: coverImage.url
+            }
+        },
+        { new:true }
+    ).select( "-password" )
+} )
+
+
+export {registerUser, loginUser, logOutUser, refreshAccessToken, changeCurrentPassword, getCurrentUser, updateAccountDetails, updateUserAvatar, updateUserCoverImage}
