@@ -189,7 +189,6 @@ const refreshAccessToken = asyncHandler( async( req, res ) => {
     if( !incomingRefreshToken) {
         throw new apiError( 401, "Unauthorised request" )
     }
-
     
     try{
         //decoding incoming refresh token
@@ -225,7 +224,58 @@ const refreshAccessToken = asyncHandler( async( req, res ) => {
     }
 })
 
+const changeCurrentPassword = asyncHandler( async( req, res ) => {
+    const {oldPassword, newPassword} = req.body
+    //finding user in DB which is requesting
+    const user = await User.findById( req.user?._id )
+    //checking if oldPassword matches that in DB
+    const isPasswordCorrect = await user.isPasswordCorrect( oldPassword )
+    if( !isPasswordCorrect ) {
+        throw new apiError( 401, "Invalid Old Password" )
+    }
+    //setting password of user in DB as newPassword
+    user.password = newPassword
+    //saving changes made in user from DB into DB
+    await user.save( {validateBeforeSave: false})
+
+    return res.status( 200 ).json( 
+        new apiResponse( 200, {}, "Password Changed successfully" )
+    )
+
+})
+
+//controller to get current user. uses approach that if user is logged in the it has passed auth middleware which has stored user in req.user
+const getCurrentUser = asyncHandler( async( req, res ) => {
+    return res.status( 200 )
+    .json( 
+        new apiResponse( 200, req.user, "Current user fetched successfully" )
+    )
+})
+
+//function to update user details
+const updateAccountDetails = asyncHandler( async( req, res ) => {
+    const { fullname, email } = req.body
+
+    if( !fullname || !email ) {
+        throw new apiError( 400, "All fields requried" )
+    }
+
+    User.findByIdAndUpdate( 
+        req.user._id,
+        {
+            $set: {
+                fullname,
+                email 
+            }
+        },
+        { new: true }
+    ).select( "-password" )
+
+    return res.status( 200 )
+    .json(
+        new apiResponse( 200, user, "Account details updated successfully" )
+    )
+})
 
 
-
-export {registerUser, loginUser, logOutUser, refreshAccessToken}
+export {registerUser, loginUser, logOutUser, refreshAccessToken, changeCurrentPassword, getCurrentUser, updateAccountDetails}
