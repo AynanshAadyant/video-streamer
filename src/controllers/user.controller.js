@@ -302,6 +302,9 @@ const updateUserAvatar = asyncHandler( async( req, res ) =>{
         },
         { new:true }
     ).select( "-password" )
+
+    return res.status( 200 )
+    .json( new apiResponse( 200, user, "Avatar updated successfully"))
 } )
 
 //controller to update cover image
@@ -327,6 +330,9 @@ const updateUserCoverImage = asyncHandler( async( req, res ) =>{
         },
         { new:true }
     ).select( "-password" )
+
+    return res.status( 200 )
+    .json( new apiResponse( 200, user, "Cover Image updated successfully"))
 } )
 
 
