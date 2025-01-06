@@ -252,7 +252,7 @@ const getCurrentUser = asyncHandler( async( req, res ) => {
     )
 })
 
-//function to update user details
+//controller to update user details
 const updateAccountDetails = asyncHandler( async( req, res ) => {
     const { fullname, email } = req.body
 
@@ -276,6 +276,31 @@ const updateAccountDetails = asyncHandler( async( req, res ) => {
         new apiResponse( 200, user, "Account details updated successfully" )
     )
 })
+
+//controller to update user avatar
+const updateUserAvatar = asyncHandler( async( req, res ) =>{ 
+    const avatarLocalPath = req.file?.path
+
+    if( !avatarLocalPath) {
+        new apiError( 400, "Avatar file is missing" )
+    }
+
+    const avatar = await uploadOnCloudinary( avatarLocalPath )
+
+    if( !avatar.url ) {
+        throw new apiError( 404, "Error while uploading on avatar" )
+    }
+
+    await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set: {
+                avatar: avatar.url
+            }
+        },
+        { new:true }
+    ).select( "-password" )
+} )
 
 
 export {registerUser, loginUser, logOutUser, refreshAccessToken, changeCurrentPassword, getCurrentUser, updateAccountDetails}
