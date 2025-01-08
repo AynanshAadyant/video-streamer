@@ -1,6 +1,7 @@
 import { asyncHandler } from "../utils/asyncHandler.js"
 import { apiError } from "../utils/apiError.js"
 import { User } from "../models/user.model.js"
+import {Video} from "../models/video.model.js"
 import { uploadOnCloudinary } from "../utils/cloudinary.js"
 import { apiResponse } from "../utils/apiResponse.js"
 import jwt from "jsonwebtoken"
@@ -20,12 +21,10 @@ const registerUser = asyncHandler( async( req, res ) => {
     //Getting in user details
     //getting in user details from frontend
     const { fullname, email, username, password } = req.body //destructuring the incoming data
-    console.log( `Data fetched from fronted`)
 
     //validation
     //checking if fields are empty or not
     if( fullname === "" || email === "" || username === "" || password === "") {
-        console.log( `field is empty`)
         throw new apiError( 400, "All fields required" )
     }
     
@@ -42,7 +41,6 @@ const registerUser = asyncHandler( async( req, res ) => {
     
     //checking if avatar file exists in local
     if( !avatarLocalPath ) {
-        console.log( `avatarLocalPath not found`)
         throw new apiError( 400, "Avatar file required" )
     }
     
@@ -335,5 +333,20 @@ const updateUserCoverImage = asyncHandler( async( req, res ) =>{
     .json( new apiResponse( 200, user, "Cover Image updated successfully"))
 } )
 
+//controller to fetch all videos uploaded by user
+const videosUploaded = asyncHandler( async( req, res ) => {
+    const user = req.user
+    if( !user ){
+        throw new apiError( 400, "User not logged in")
+    }
+    const videos = await Video.find( {
+        owner: user._id
+    })
 
-export {registerUser, loginUser, logOutUser, refreshAccessToken, changeCurrentPassword, getCurrentUser, updateAccountDetails, updateUserAvatar, updateUserCoverImage}
+    return res.status( 200 )
+    .json( 200, videos, "All video fetched" )
+    //no videos have been uploaded so videos will be an empty array which will be handled in the frontend
+})
+
+
+export {registerUser, loginUser, logOutUser, refreshAccessToken, changeCurrentPassword, getCurrentUser, updateAccountDetails, updateUserAvatar, updateUserCoverImage, videosUploaded}
